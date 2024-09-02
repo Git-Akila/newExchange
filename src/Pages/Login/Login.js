@@ -1,92 +1,57 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import PatternLock from "react-pattern-lock";
-import { useDispatch, useSelector } from "react-redux";
-import { loginUser } from "../../Slicers/loginSlice"; // Adjust import based on your file structure
-// import { setToken } from "./path/to/your/tokenSlice"; // Adjust import based on your file structure
+import { loginUser } from "../../Slicers/loginSlice";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pattern, setPattern] = useState([]);
   const [isPatternLocked, setIsPatternLocked] = useState(false);
-  const navigate = useNavigate();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const { isLoading, isError } = useSelector((state) => state.login);
-
-  useEffect(() => {
-    dispatch(loginUser());
-  }, [dispatch]);
-
-  if (isLoading) {
-    return <p>Loading...</p>;
-  }
-
-  if (isError) {
-    return <p>There was an error fetching the data.</p>;
-  }
+  const { isLoading, isError, data } = useSelector((state) => state.login);
 
   const handleRegister = async (e) => {
-    e.preventDefault();}
+    e.preventDefault();
 
-  //   if (!isPatternLocked) {
-  //     toast.error("Please set a pattern first!");
-  //     return;
-  //   }
+    if (!isPatternLocked) {
+      toast.error("Please set a pattern first!");
+      return;
+    }
 
-  //    try {
-  //     const res = await axios.post("/api/login", {
-  //       email,
-  //       password,
-  //       pattern: pattern.join("")
-  //     });
+    try {
+      await dispatch(
+        loginUser({ email, password, pattern: pattern.join("") })
+      ).unwrap(); // Using unwrap to handle errors
 
-  //     const token = res.data?.token;
-  //     if (token) {
-  //       localStorage.setItem("token", token);
-  //       dispatch((token)); 
-  //       toast.success("Login successful!");
-  //       setEmail("");
-  //       setPassword("");
-  //       setPattern([]);
-  //       setIsPatternLocked(false);
-  //       navigate("/");
-  //     } else {
-  //       toast.error("Failed to retrieve token.");
-  //     }
-  //   } catch (error) {
-  //     console.error("Login error", error);
-  //     toast.error(
-  //       error.response?.data?.message || "An error occurred during login."
-  //     );
-  //     if (error.response) {
-  //       const { status, data } = error.response;
-  //       if (status === 400 && data.message.includes("Retry limit exceeded")) {
-  //         toast.error("Too many login attempts. Please wait for 10 seconds before trying again.");
-  //       } else {
-  //         toast.error(`Error: ${data.message || "An error occurred during login."}`);
-  //       }
-  //     } else if (error.request) {
-  //       toast.error("No response from the server. Please try again later.");
-  //     } else {
-  //       toast.error("An unexpected error occurred.");
-  //     }
-  //     setIsPatternLocked(false);
-  //   }
-  // };
+      toast.success("Login successful!");
+      setEmail("");
+      setPassword("");
+      setPattern([]);
+      setIsPatternLocked(false);
+      navigate("/"); 
+    } catch (error) {
+      toast.error(error.message || "An error occurred during login.");
+      setIsPatternLocked(false);
+    }
+  };
 
-  // const handlePatternChange = (newPattern) => {
-  //   setPattern(newPattern);
-  // };
+  const handlePatternChange = (newPattern) => {
+    setPattern(newPattern);
+  };
 
-  // const handlePatternFinish = () => {
-  //   setIsPatternLocked(true);
-  // };
-
+  const handlePatternFinish = () => {
+    setIsPatternLocked(true);
+  };
+  console.log("Email:", email);
+  console.log("Password:", password);
+  console.log("Pattern:", pattern.join(""));
+  
   return (
     <div className="flex justify-center items-center mt-10">
       <form
@@ -121,8 +86,8 @@ const Login = () => {
             pointSize={15}
             size={3}
             path={pattern}
-            // onChange={handlePatternChange}
-            // onFinish={handlePatternFinish}
+            onChange={handlePatternChange}
+            onFinish={handlePatternFinish}
             disabled={isPatternLocked}
           />
         </div>
@@ -131,9 +96,9 @@ const Login = () => {
           <button
             type="submit"
             className="p-3 m-2 bg-white rounded-2xl text-center"
-            disabled={!isPatternLocked}
+            disabled={isLoading || !isPatternLocked}
           >
-            Login
+            {isLoading ? "Logging in..." : "Login"}
           </button>
         </div>
       </form>

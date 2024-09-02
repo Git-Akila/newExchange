@@ -1,29 +1,29 @@
-import "./App.css";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  Navigate,
-} from "react-router-dom";
-import Navbar from "../src/Navbar/Navbar";
-// import { useToken } from './Pages/Login/useToken';
-import Login from "./Pages/Login/Login";
-import Dashboard from "../src/Pages/Dashboard";
+import React from 'react';
+import './App.css'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Layout from '../src/Navbar/Layout'; // Import the Layout component
+import Login from '../src/Pages/Login/Login';
+import Dashboard from '../src/Pages/Dashboard';
 
-function App() {
+const App = () => {
+  const token = localStorage.getItem("token"); 
+
   return (
-    <>
-      {/* <Navbar/>
-    <Dashboard/> */}
-      <Router>
-        <Navbar />
+    <Router>
+      <Layout>
         <Routes>
-          {/* <Route path="/login" element={<Login />} /> */}
-          <Route path="/" element={<Dashboard />} />
+          <Route
+            path="/login"
+            element={token ? <Navigate to="/" /> : <Login />}
+          />
+          <Route
+            path="/"
+            element={token ? <Dashboard /> : <Navigate to="/login" />}
+          />
         </Routes>
-      </Router>
-    </>
+      </Layout>
+    </Router>
   );
-}
+};
 
 export default App;

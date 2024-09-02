@@ -1,15 +1,8 @@
-import React, { useEffect, useImperativeHandle, forwardRef } from "react";
+import React, { useImperativeHandle, forwardRef, useState } from "react";
 import MUIDataTable from "mui-datatables";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import styled from 'styled-components';
 import { FaRegEdit } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
-//npm install mui-datatables @mui/material react-icons
-//npm install @emotion/react @emotion/styled
-//npm install @mui/icons-material
-
-
-
 
 const HideScrollbarDiv = styled.div`
   overflow-x: hidden;
@@ -22,21 +15,14 @@ const HideScrollbarDiv = styled.div`
   }
 `;
 
-const DataTable = forwardRef(({ data}, ref) => {
-  // const navigate = useNavigate();
-  // const [tableData, setTableData] = React.useState(data);
+const DataTable = forwardRef(({ initialData }, ref) => {
+  const [tableData, setTableData] = useState(initialData || []);
 
-  // useImperativeHandle(ref, () => ({
-  //   updateData(newData) {
-  //     console.log("Updating table data:", newData); 
-  //     setTableData(newData);
-  //   }
-  // }));
-
-  // useEffect(() => {
-  //   console.log("Data updated:", data);  
-  //   setTableData(data);
-  // }, [data]);
+  useImperativeHandle(ref, () => ({
+    updateData(newData) {
+      setTableData(newData);
+    }
+  }));
 
   const columns = [
     { name: "S.No", options: { customBodyRender: (value, tableMeta) => tableMeta.rowIndex + 1 } },
@@ -58,7 +44,6 @@ const DataTable = forwardRef(({ data}, ref) => {
     rowsPerPage: 5,
     responsive: "vertical",
     rowsPerPageOptions: [5, 10, 20, 25],
-   
   };
 
   const getMuiTheme = () => createTheme({
@@ -80,7 +65,7 @@ const DataTable = forwardRef(({ data}, ref) => {
         <ThemeProvider theme={getMuiTheme()}>
           <MUIDataTable
             title={"User List"}
-            data={data}
+            data={tableData}
             columns={columns}
             options={options}
           />
